@@ -2,8 +2,6 @@ package edu.kaua.aprendendo_spring_security.domain;
 
 import jakarta.persistence.*;
 
-import java.util.UUID;
-
 @Table(name = "product")
 @Entity
 public class Product {

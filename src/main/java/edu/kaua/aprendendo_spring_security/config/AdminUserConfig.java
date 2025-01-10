@@ -7,6 +7,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+//Essa classe verifica se existe um usuário padrão para admin, caso não, é criado.
 @Configuration
 public class AdminUserConfig implements CommandLineRunner {
 
@@ -17,7 +18,6 @@ public class AdminUserConfig implements CommandLineRunner {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
-
     @Override
     @Transactional
     public void run(String... args) throws Exception {
