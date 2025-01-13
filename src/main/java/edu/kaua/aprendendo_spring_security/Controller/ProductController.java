@@ -76,4 +76,9 @@ public class ProductController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     };
+
+    @GetMapping("/StorageValue")
+    public Double StorageValue() {
+      return productRepository.findStorageValue();
+    };
 }

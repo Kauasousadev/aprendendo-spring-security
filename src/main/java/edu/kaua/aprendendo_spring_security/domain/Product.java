@@ -10,6 +10,11 @@ public class Product {
     @Column(name = "product_id")
     private int productId;
 
+    //@Id
+    //GeneratedValue(GERAR CODIGO DE BARRA)
+    //@Column(name = "barcode")
+    //private --- barcode
+
     @Column(name = "product_name", nullable = false)
     private String productName;
 
