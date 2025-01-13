@@ -1,12 +1,18 @@
 package edu.kaua.aprendendo_spring_security.Controller;
 
+import edu.kaua.aprendendo_spring_security.Controller.dto.ProductDTO;
+import edu.kaua.aprendendo_spring_security.Controller.dto.ProductRequest;
+import edu.kaua.aprendendo_spring_security.Controller.dto.UnitRequest;
 import edu.kaua.aprendendo_spring_security.domain.Product;
+import edu.kaua.aprendendo_spring_security.domain.ProductUnit;
 import edu.kaua.aprendendo_spring_security.repository.ProductRepository;
+import edu.kaua.aprendendo_spring_security.repository.ProductUnitRepository;
 import edu.kaua.aprendendo_spring_security.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,28 +23,53 @@ public class ProductController {
     private final ProductRepository productRepository;
     @Autowired
     private final ProductService productService;
+    @Autowired
+    private ProductUnitRepository productUnitRepository;
 
     // Injeção de dependência via construtor (recomendado)
     @Autowired
     public ProductController(ProductRepository productRepository) {
         this.productRepository = productRepository;
-        this.productService = new ProductService(productRepository);
+        this.productService = new ProductService(productRepository, productUnitRepository);
     }
 
     @PostMapping("/new")
-    public ResponseEntity<String> newProduct(@RequestBody Product product) {
+    public ResponseEntity<String> newProduct(@RequestBody ProductRequest productRequest) {
         // Validando entrada
-        if (product == null || product.getProductName() == null) {
+        if (productRequest == null || productRequest.getProductName() == null) {
             return ResponseEntity.badRequest().body("Invalid product data");
+        }else{
+
+            Product product = new Product(
+                    productRequest.getProductName(),
+                    productRequest.getProductDescription(),
+                    productRequest.getProductPrice()
+            );
+
+            productService.addProductUnit(productRequest.getProductQuantity(), product);
+            productService.newProduct(product);
+            return ResponseEntity.ok("Product saved successfully");
         }
-        productService.newProduct(product);
-        return ResponseEntity.ok("Product saved successfully");
+    }
+
+
+    @PostMapping("/addUnit")
+    public ResponseEntity<String> addUnit(@RequestBody UnitRequest unitRequest) {
+        productService.addProductUnit(
+                unitRequest.getQuantity(),
+                productRepository.findByProductId(unitRequest.getProductId())
+        );
+        return ResponseEntity.ok("Unit added successfully");
     }
 
     @GetMapping("/products")
-    public ResponseEntity<List<Product>> findAllProducts() {
-        List<Product> products = (List<Product>) productRepository.findAll();
-        return ResponseEntity.ok(products);
+    public ResponseEntity<List<ProductDTO>> findAllProducts() {
+        List<Product> products = productService.getAllProducts();
+        List<ProductDTO> productDTOs = products.stream()
+                .map(ProductDTO::new)
+                .toList();
+
+        return ResponseEntity.ok(productDTOs);
     }
 
     @DeleteMapping("/delete/{id}")

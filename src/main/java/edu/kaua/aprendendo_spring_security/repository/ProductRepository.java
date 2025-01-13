@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer> {
     Optional<Product> findByProductName(String name);
-    Optional<Product> findByProductId(int id);
+    Product findByProductId(int id);
 
     @Query(value = "SELECT SUM(product_price) as storageValue FROM product", nativeQuery = true)
     Double findStorageValue();

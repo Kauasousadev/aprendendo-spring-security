@@ -2,6 +2,9 @@ package edu.kaua.aprendendo_spring_security.domain;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Table(name = "product")
 @Entity
 public class Product {
@@ -9,11 +12,6 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "product_id")
     private int productId;
-
-    //@Id
-    //GeneratedValue(GERAR CODIGO DE BARRA)
-    //@Column(name = "barcode")
-    //private --- barcode
 
     @Column(name = "product_name", nullable = false)
     private String productName;
@@ -24,6 +22,9 @@ public class Product {
     @Column(name = "product_price")
     private double productPrice;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<ProductUnit> units;
+
     public Product(String productName, String productDescription, double productPrice) {
         this.productName = productName;
         this.productDescription = productDescription;
@@ -31,6 +32,13 @@ public class Product {
     }
 
     public Product() {}
+
+    public void addUnits(ProductUnit unit) {
+        if (units == null) {
+            units = new ArrayList<>();
+        }
+        units.add(unit);
+    }
 
     public int getProductId() {
         return productId;
@@ -62,5 +70,13 @@ public class Product {
 
     public void setProductPrice(double productPrice) {
         this.productPrice = productPrice;
+    }
+
+    public List<ProductUnit> getUnits() {
+        return units;
+    }
+
+    public void setUnits(List<ProductUnit> units) {
+        this.units = units;
     }
 }
