@@ -2,6 +2,7 @@ package edu.kaua.aprendendo_spring_security.Controller;
 
 import edu.kaua.aprendendo_spring_security.domain.Product;
 import edu.kaua.aprendendo_spring_security.repository.ProductRepository;
+import edu.kaua.aprendendo_spring_security.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,13 +13,16 @@ import java.util.Map;
 @RestController
 @RequestMapping("/storage")
 public class ProductController {
-
+    @Autowired
     private final ProductRepository productRepository;
+    @Autowired
+    private final ProductService productService;
 
     // Injeção de dependência via construtor (recomendado)
     @Autowired
     public ProductController(ProductRepository productRepository) {
         this.productRepository = productRepository;
+        this.productService = new ProductService(productRepository);
     }
 
     @PostMapping("/new")
@@ -27,8 +31,7 @@ public class ProductController {
         if (product == null || product.getProductName() == null) {
             return ResponseEntity.badRequest().body("Invalid product data");
         }
-
-        productRepository.save(product);
+        productService.newProduct(product);
         return ResponseEntity.ok("Product saved successfully");
     }
 
@@ -40,41 +43,29 @@ public class ProductController {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable int id) {
-        productRepository.deleteById(id);
-        return ResponseEntity.ok("Product deleted successfully");
+        if (productService.deleteProduct(id)) {
+            return ResponseEntity.ok("Product deleted successfully");
+        }else{
+            return ResponseEntity.badRequest().body("Product not found");
+        }
     }
 
     @PatchMapping("/updateproduct/{id}")
     public ResponseEntity<String> updateProduct(@PathVariable int id, @RequestBody Product updatedProduct) {
-        return productRepository.findById(id)
-                .map(product -> {
-                    product.setProductName(updatedProduct.getProductName());
-                    product.setProductDescription(updatedProduct.getProductDescription());
-                    product.setProductPrice(updatedProduct.getProductPrice());
-                    productRepository.save(product);
-                    return ResponseEntity.ok("Product updated successfully");
-                })
-                .orElse(ResponseEntity.notFound().build());
+        if (productService.updateProduct(id, updatedProduct)) {
+            return ResponseEntity.ok("Product updated successfully");
+        }else{
+            return ResponseEntity.badRequest().body("Product not found");
+        }
     }
 
     @PutMapping("/parcialupdate/{id}")
     public ResponseEntity<String> parcialUpdateProduct(@PathVariable int id, @RequestBody Map<String, Object> updates) {
-        return productRepository.findById(id)
-                .map(product -> {
-                    updates.forEach((key, value) -> {
-                        switch (key) {
-                            case "productName": product.setProductName((String) value);
-                            break;
-                            case "productDescription": product.setProductDescription((String) value);
-                            break;
-                            case "productPrice": product.setProductPrice((Double) value);
-                            break;
-                        }
-                    });
-                    productRepository.save(product);
-                    return ResponseEntity.ok("Product updated successfully");
-                })
-                .orElse(ResponseEntity.notFound().build());
+        if (productService.parcialUpdateProduct(id, updates)) {
+            return ResponseEntity.ok("Product updated successfully");
+        }else{
+            return ResponseEntity.badRequest().body("Product not found");
+        }
     };
 
     @GetMapping("/StorageValue")
