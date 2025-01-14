@@ -59,7 +59,14 @@ public class ProductController {
                 unitRequest.getQuantity(),
                 productRepository.findByProductId(unitRequest.getProductId())
         );
+        productRepository.save(productRepository.findByProductId(unitRequest.getProductId()));
         return ResponseEntity.ok("Unit added successfully");
+    }
+
+    @DeleteMapping("/deleteUnit")
+    public ResponseEntity<String> deleteUnit(@RequestBody UnitRequest unitRequest) {
+        productService.deleteProductUnit(unitRequest.getUnitId());
+        return ResponseEntity.ok("Unit deleted successfully");
     }
 
     @GetMapping("/products")

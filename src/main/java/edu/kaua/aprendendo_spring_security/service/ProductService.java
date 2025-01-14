@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class ProductService {
@@ -84,6 +85,15 @@ public class ProductService {
         for (int i = 0; i < quantity; i++){
             ProductUnit productUnit = new ProductUnit(product);
             product.addUnits(productUnit);
+        }
+    }
+
+    public boolean deleteProductUnit(UUID productUnitId) {
+        if (productUnitRepository.findById(productUnitId).isPresent()){
+            productUnitRepository.deleteById(productUnitId);
+            return true;
+        }else{
+            return false;
         }
     }
 
