@@ -8,6 +8,7 @@ import edu.kaua.aprendendo_spring_security.domain.ProductUnit;
 import edu.kaua.aprendendo_spring_security.repository.ProductRepository;
 import edu.kaua.aprendendo_spring_security.repository.ProductUnitRepository;
 import edu.kaua.aprendendo_spring_security.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,27 +35,21 @@ public class ProductController {
     }
 
     @PostMapping("/new")
-    public ResponseEntity<String> newProduct(@RequestBody ProductRequest productRequest) {
-        // Validando entrada
-        if (productRequest == null || productRequest.getProductName() == null) {
-            return ResponseEntity.badRequest().body("Invalid product data");
-        }else{
+    public ResponseEntity<String> newProduct(@Valid @RequestBody ProductRequest productRequest) {
 
-            Product product = new Product(
-                    productRequest.getProductName(),
-                    productRequest.getProductDescription(),
-                    productRequest.getProductPrice()
-            );
+        Product product = new Product(
+                productRequest.getProductName(),
+                productRequest.getProductDescription(),
+                productRequest.getProductPrice()
+        );
 
-            productService.addProductUnit(productRequest.getProductQuantity(), product);
-            productService.newProduct(product);
-            return ResponseEntity.ok("Product saved successfully");
-        }
+        productService.addProductUnit(productRequest.getProductQuantity(), product);
+        productService.newProduct(product);
+        return ResponseEntity.ok("Product saved successfully");
     }
 
-
     @PostMapping("/addUnit")
-    public ResponseEntity<String> addUnit(@RequestBody UnitRequest unitRequest) {
+    public ResponseEntity<String> addUnit(@Valid @RequestBody UnitRequest unitRequest) {
         productService.addProductUnit(
                 unitRequest.getQuantity(),
                 productRepository.findByProductId(unitRequest.getProductId())
@@ -64,7 +59,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/deleteUnit")
-    public ResponseEntity<String> deleteUnit(@RequestBody UnitRequest unitRequest) {
+    public ResponseEntity<String> deleteUnit(@Valid @RequestBody UnitRequest unitRequest) {
         productService.deleteProductUnit(unitRequest.getUnitId());
         return ResponseEntity.ok("Unit deleted successfully");
     }
@@ -80,7 +75,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable int id) {
+    public ResponseEntity<String> deleteProduct(@Valid @PathVariable int id) {
         if (productService.deleteProduct(id)) {
             return ResponseEntity.ok("Product deleted successfully");
         }else{
